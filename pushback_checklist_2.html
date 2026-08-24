@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pushback 체크리스트</title>
+<style>
+  :root{
+    --bg:#12161b;
+    --bg-grain:#0e1116;
+    --panel:#1b2129;
+    --panel-2:#212933;
+    --border:#2c343e;
+    --text:#eef2f6;
+    --text-dim:#8b96a3;
+    --req:#f2a33d;       /* 필수 - 램프 안전등 오렌지 */
+    --req-dim:#4a3a22;
+    --req-em:#e6483f;    /* 필수(비정상) - 레드 */
+    --req-em-dim:#4a2422;
+    --opt:#4d9de0;       /* 선택 - 유도로 블루 */
+    --opt-dim:#22323e;
+    --ok:#3ecf6e;         /* 완료 - 그린 */
+    --ok-dim:#173322;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, #1a2028 0%, var(--bg) 55%),
+      repeating-linear-gradient(0deg, transparent 0 38px, rgba(255,255,255,0.012) 38px 39px);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Pretendard","Malgun Gothic",sans-serif;
+    min-height:100vh;
+    padding:18px 14px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+
+  /* header */
+  .hdr{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .hdr-title{
+    font-size:12px; letter-spacing:.16em; color:var(--text-dim); font-weight:700;
+    text-transform:uppercase;
+  }
+  .hdr h1{
+    margin:2px 0 0; font-size:19px; font-weight:800; letter-spacing:-0.01em;
+    display:flex; align-items:baseline; gap:6px; white-space:nowrap;
+  }
+  .airport-select{
+    appearance:none; -webkit-appearance:none; border:none; outline:none;
+    background:var(--req-dim); color:var(--req); font-family:inherit;
+    font-size:13px; font-weight:800; letter-spacing:.02em;
+    padding:2px 16px 2px 7px; border-radius:6px; cursor:pointer; flex-shrink:0;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0L5 6L10 0Z' fill='%23f2a33d'/></svg>");
+    background-repeat:no-repeat; background-position:right 6px center; background-size:8px 5px;
+  }
+  .hdr .sub{font-size:12.5px;color:var(--text-dim);margin-top:3px;}
+
+  .log-toggle{
+    flex-shrink:0; margin-top:2px; background:var(--panel-2); border:1px solid var(--border);
+    color:var(--text-dim); font-size:11.5px; font-weight:700; padding:7px 11px; border-radius:8px;
+    cursor:pointer; display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .log-toggle:active{background:var(--panel);}
+  .log-toggle .dotbadge{
+    width:7px;height:7px;border-radius:50%; background:var(--text-dim);
+  }
+  .log-toggle.has-data .dotbadge{background:var(--ok);}
+
+  /* mode switch */
+/* operator name bar */
+  .operator-bar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--panel-2); border:1px solid var(--border); border-radius:10px;
+    padding:10px 14px; margin-bottom:16px;
+  }
+  .operator-bar .op-label{font-size:9.5px; font-weight:800; letter-spacing:.08em; color:var(--text-dim); text-transform:uppercase; flex-shrink:0;}
+  .operator-input{
+    flex:1; background:transparent; border:none; outline:none; font-family:inherit;
+    font-size:15px; font-weight:700; color:var(--text);
+  }
+  .operator-input::placeholder{color:#4a5560; font-weight:600;}
+  .operator-input:disabled, .flight-input:disabled{opacity:.45; cursor:wait;}
+
+  
+  /* flight info plate */
+  .info-plate{
+    display:flex; align-items:stretch; gap:0;
+    background:var(--panel-2); border:1px solid var(--border); border-radius:10px;
+    overflow:hidden; margin-bottom:16px;
+  }
+  .info-cell{
+    flex:1; padding:10px 14px; display:flex; flex-direction:column; justify-content:center; gap:2px;
+    border-right:1px solid var(--border);
+  }
+  .info-cell.flight{flex:3;}
+  .info-cell:last-child{border-right:none;}
+  .info-cell .info-label{
+    font-size:9.5px; font-weight:800; letter-spacing:.08em; color:var(--text-dim); text-transform:uppercase;
+  }
+  .info-cell .info-value{
+    font-size:16px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:.01em;
+  }
+  .info-cell .info-value.time{color:var(--opt);}
+  .flight-input-group{display:flex; align-items:center; gap:4px;}
+  .flight-input{
+    background:transparent; border:none; outline:none; padding:0;
+    font-size:17px; font-weight:800; color:var(--req); letter-spacing:.06em;
+    font-family:inherit; text-transform:uppercase;
+  }
+  .flight-code-select{
+    appearance:none; -webkit-appearance:none; border:none; outline:none;
+    background:transparent; cursor:pointer; width:auto; flex:none;
+    padding:2px 15px 2px 0;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0L5 6L10 0Z' fill='%23f2a33d'/></svg>");
+    background-repeat:no-repeat; background-position:right center; background-size:9px 6px;
+  }
+  .flight-code-select:disabled{opacity:.45; cursor:wait; background-image:none;}
+  .flight-input.flight-num{width:4.2ch; flex:none;}
+  .flight-sep{color:var(--text-dim); font-weight:800; font-size:15px;}
+  .flight-input::placeholder{color:#4a5560; font-weight:700; letter-spacing:.04em;}
+  .info-cell.flight{cursor:text;}
+  .info-cell.flight.invalid .flight-input{color:var(--req-em);}
+
+  /* annunciator strip */
+  .annun{
+    display:grid; grid-template-columns:repeat(6,1fr); gap:6px;
+    background:var(--panel-2); border:1px solid var(--border); border-radius:10px;
+    padding:10px; margin-bottom:16px;
+  }
+  .lamp{
+    display:flex; flex-direction:column; align-items:center; gap:5px; padding:4px 2px;
+  }
+  .lamp .dot{
+    width:12px;height:12px;border-radius:50%;
+    background:#3a4249; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    transition: all .25s ease;
+  }
+  .lamp.done .dot{background:var(--ok); box-shadow:0 0 8px 2px rgba(62,207,110,0.55);}
+  .lamp .lbl{font-size:9.5px; color:var(--text-dim); text-align:center; line-height:1.25; letter-spacing:-0.01em;}
+  .lamp.done .lbl{color:var(--ok);}
+
+  /* progress */
+  .progress-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px;
+  }
+  .progress-row .p-label{font-size:12.5px; color:var(--text-dim); flex-shrink:0;}
+  .bar{flex:1; height:8px; background:#252c34; border-radius:5px; overflow:hidden;}
+  .bar-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--req),var(--ok)); transition:width .35s ease;}
+  .p-count{font-size:13px; font-weight:700; color:var(--text); flex-shrink:0; min-width:38px; text-align:right;}
+
+  /* cards */
+  .list{display:flex; flex-direction:column; gap:10px;}
+  .list.locked .card{opacity:.4; pointer-events:none;}
+  .lock-notice{
+    display:none; align-items:center; gap:8px; font-size:12.5px; color:var(--req);
+    background:var(--req-dim); border:1px solid var(--req); border-radius:9px;
+    padding:10px 13px; margin-bottom:12px; font-weight:700;
+  }
+  .lock-notice.show{display:flex;}
+  .card{
+    border-radius:12px; border:1px solid var(--border); background:var(--panel);
+    overflow:hidden; transition:border-color .2s ease;
+  }
+  .card.open{border-color:#3a4552;}
+  .card.done{border-color:var(--ok);}
+  .card-head{
+    display:flex; align-items:center; gap:12px; padding:14px 14px;
+    cursor:pointer; user-select:none;
+  }
+  .badge{
+    flex-shrink:0; font-size:10.5px; font-weight:800; letter-spacing:.03em;
+    padding:4px 8px; border-radius:6px; white-space:nowrap;
+  }
+  .badge.req{background:var(--req-dim); color:var(--req);}
+  .badge.req-em{background:var(--req-em-dim); color:var(--req-em);}
+  .badge.opt{background:var(--opt-dim); color:var(--opt);}
+
+  .card-main{flex:1; min-width:0;}
+  .card-main .item-name{font-size:15.5px; font-weight:700; color:var(--text); letter-spacing:-0.01em;}
+  .card-main .item-sub{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+
+  .status-icon{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    border:1.6px solid #3a4249; display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:transparent; transition:all .2s ease;
+  }
+  .card.done .status-icon{background:var(--ok); border-color:var(--ok); color:#0d1610;}
+  .card.done .status-icon::after{content:"✓";}
+  .chev{flex-shrink:0; color:var(--text-dim); font-size:12px; transition:transform .2s ease;}
+  .card.open .chev{transform:rotate(90deg);}
+
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .28s ease;
+  }
+  .card.open .card-body{max-height:400px;}
+  .card-body-inner{
+    padding:0 14px 16px 14px; border-top:1px solid var(--border); margin-top:0;
+  }
+  .proc-label{font-size:10.5px; color:var(--text-dim); font-weight:700; letter-spacing:.06em; margin:12px 0 6px;}
+  .proc-text{
+    font-size:13.5px; line-height:1.65; color:#dbe2e9;
+    background:#151b21; border:1px solid var(--border); border-radius:8px; padding:12px 13px;
+    white-space:pre-line;
+  }
+  .confirm-btn{
+    margin-top:12px; width:100%; padding:11px; border-radius:8px; border:none;
+    font-size:14px; font-weight:800; cursor:pointer; letter-spacing:.02em;
+    background:var(--req); color:#241a08; transition:filter .15s ease;
+  }
+  .card[data-cat="req-em"] .confirm-btn{background:var(--req-em); color:#2a0f0d;}
+  .card[data-cat="opt"] .confirm-btn{background:var(--opt); color:#0a1e2e;}
+  .confirm-btn:active{filter:brightness(0.9);}
+  .card.done .confirm-btn{background:#2a3138; color:var(--ok);}
+
+  /* flight slot tabs */
+  .slot-bar{margin-bottom:16px;}
+  .slot-bar-hdr{
+    display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;
+  }
+  .slot-bar-label{font-size:11.5px; font-weight:800; color:var(--text-dim); letter-spacing:.02em;}
+  .slot-bar-label b{color:var(--text);}
+  .slot-bar-count{font-size:11px; color:var(--text-dim); font-weight:700;}
+  .slot-tabs{
+    display:grid; grid-template-columns:repeat(10,1fr); gap:4px;
+  }
+  .slot-tab{
+    display:flex; align-items:center; justify-content:center;
+    padding:0; min-height:32px; border-radius:7px; cursor:pointer;
+    background:var(--panel); border:1.5px solid var(--border);
+    transition:all .15s ease;
+  }
+  .slot-tab .slot-num{font-size:12px; font-weight:800; color:var(--text-dim);}
+  .slot-tab.progress{border-color:var(--req);}
+  .slot-tab.progress .slot-num{color:var(--req);}
+  .slot-tab.done{border-color:var(--ok); background:var(--ok-dim);}
+  .slot-tab.done .slot-num{color:var(--ok);}
+  .slot-tab.active{
+    border-color:var(--opt); border-width:2px;
+    background:var(--opt-dim);
+    box-shadow:0 0 0 1px rgba(77,157,224,0.35), 0 0 10px rgba(77,157,224,0.25);
+  }
+  .slot-tab.active .slot-num{color:var(--opt);}
+  .slot-tab:active{filter:brightness(1.15);}
+
+  /* footer note */
+  .footnote{
+    margin-top:18px; font-size:11.5px; color:var(--text-dim); text-align:center; line-height:1.6;
+  }
+  .footnote b{color:var(--text);}
+  .reset-btn{
+    display:block; margin:14px auto 0; background:transparent; border:1px solid var(--border);
+    color:var(--text-dim); font-size:12px; padding:8px 16px; border-radius:20px; cursor:pointer;
+  }
+  .reset-btn:active{background:var(--panel-2);}
+
+  /* modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(6,8,10,0.72);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:50; padding:20px;
+    backdrop-filter:blur(2px);
+  }
+  .modal-overlay.show{opacity:1; pointer-events:auto;}
+  .modal{
+    background:linear-gradient(180deg,#152018,#0f1712);
+    border:1.5px solid var(--ok); border-radius:16px; padding:34px 28px 26px;
+    text-align:center; max-width:340px; width:100%;
+    box-shadow:0 0 0 1px rgba(62,207,110,0.15), 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(62,207,110,0.18);
+    transform:scale(.92); transition:transform .25s ease;
+  }
+  .modal-overlay.show .modal{transform:scale(1);}
+  .modal .beacon{
+    width:56px; height:56px; border-radius:50%; margin:0 auto 16px;
+    background:var(--ok); display:flex; align-items:center; justify-content:center;
+    font-size:26px; color:#0d1610; box-shadow:0 0 0 8px rgba(62,207,110,0.12), 0 0 24px rgba(62,207,110,0.5);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 8px rgba(62,207,110,0.12), 0 0 24px rgba(62,207,110,0.5);}
+    50%{box-shadow:0 0 0 14px rgba(62,207,110,0.06), 0 0 34px rgba(62,207,110,0.65);}
+  }
+  .modal h2{
+    margin:0 0 8px; font-size:22px; font-weight:800; color:var(--ok); letter-spacing:.01em;
+  }
+  .modal p{margin:0; font-size:13px; color:var(--text-dim); line-height:1.6;}
+  .modal .close-btn{
+    margin-top:22px; width:100%; padding:12px; border-radius:9px; border:none;
+    background:var(--ok); color:#0d1610; font-weight:800; font-size:14px; cursor:pointer;
+  }
+
+  @media (max-width:400px){
+    .annun{grid-template-columns:repeat(3,1fr); row-gap:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">Interphone Man · Ramp Ops</div>
+      <h1>
+        <select class="airport-select" id="airportSelect">
+          <option value="ICN">ICN</option>
+          <option value="GMP">GMP</option>
+          <option value="PUS">PUS</option>
+          <option value="CJU">CJU</option>
+          <option value="TAE">TAE</option>
+          <option value="KWJ">KWJ</option>
+          <option value="RSU">RSU</option>
+          <option value="USN">USN</option>
+          <option value="KPO">KPO</option>
+          <option value="WJU">WJU</option>
+          <option value="MWX">MWX</option>
+          <option value="YNY">YNY</option>
+          <option value="HIN">HIN</option>
+          <option value="KUV">KUV</option>
+        </select>
+        Pushback 체크리스트
+      </h1>
+      <div class="sub">항목을 눌러 조치절차를 확인하세요</div>
+    </div>
+  </div>
+
+  <div id="workerView">
+
+  <div class="operator-bar">
+    <div class="op-label">성명</div>
+    <input class="operator-input" id="operatorInput" placeholder="불러오는 중..." maxlength="12" autocomplete="off" spellcheck="false" disabled>
+  </div>
+
+  <div class="slot-bar">
+    <div class="slot-bar-hdr">
+      <div class="slot-bar-label">오늘 조업편 <b>(<span id="slotDoneCount">0</span>/10 완료)</b></div>
+      <div class="slot-bar-count">편 선택 후 확인 진행</div>
+    </div>
+    <div class="slot-tabs" id="slotTabs"></div>
+  </div>
+
+  <div class="info-plate">
+    <div class="info-cell">
+      <div class="info-label">Date</div>
+      <div class="info-value" id="dateVal">--.--.--</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-label" id="timeLabel">Time</div>
+      <div class="info-value time" id="timeVal">--:--:--</div>
+    </div>
+    <div class="info-cell flight" id="flightCell">
+      <div class="info-label">Flight No.</div>
+      <div class="flight-input-group">
+        <select class="flight-input flight-code-select" id="flightCode" disabled>
+          <option value="">코드</option>
+          <optgroup label="국내 항공사">
+            <option value="KE">KE 대한항공</option>
+            <option value="OZ">OZ 아시아나항공</option>
+            <option value="LJ">LJ 진에어</option>
+            <option value="TW">TW 티웨이항공</option>
+            <option value="BX">BX 에어부산</option>
+            <option value="RS">RS 에어서울</option>
+            <option value="ZE">ZE 이스타항공</option>
+            <option value="7C">7C 제주항공</option>
+            <option value="YP">YP 에어프레미아</option>
+            <option value="RF">RF 에어로케이</option>
+          </optgroup>
+          <optgroup label="해외 항공사">
+            <option value="DL">DL Delta</option>
+            <option value="UA">UA United</option>
+            <option value="AA">AA American</option>
+            <option value="AF">AF Air France</option>
+            <option value="KL">KL KLM</option>
+            <option value="CZ">CZ China Southern</option>
+            <option value="MU">MU China Eastern</option>
+            <option value="MF">MF Xiamen Air</option>
+            <option value="GA">GA Garuda Indonesia</option>
+            <option value="VN">VN Vietnam Airlines</option>
+            <option value="CI">CI China Airlines</option>
+            <option value="BR">BR EVA Air</option>
+            <option value="JL">JL Japan Airlines</option>
+            <option value="NH">NH ANA</option>
+            <option value="SQ">SQ Singapore Airlines</option>
+            <option value="TG">TG Thai Airways</option>
+            <option value="CX">CX Cathay Pacific</option>
+            <option value="QR">QR Qatar Airways</option>
+            <option value="EK">EK Emirates</option>
+            <option value="TK">TK Turkish Airlines</option>
+            <option value="LH">LH Lufthansa</option>
+          </optgroup>
+        </select>
+        <span class="flight-sep">·</span>
+        <input class="flight-input flight-num" id="flightNum" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="1234" maxlength="4" autocomplete="off" spellcheck="false" disabled>
+      </div>
+    </div>
+  </div>
+
+  <div class="annun" id="annun"></div>
+
+  <div class="progress-row">
+    <div class="p-label">필수 확인</div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <div class="p-count" id="pCount">0/3</div>
+  </div>
+
+  <div class="lock-notice" id="lockNotice">⚠ 편명을 입력해야 항목 확인이 가능합니다</div>
+
+  <div class="list" id="list"></div>
+
+  <div class="footnote">
+    <b>필수</b> 항목은 전체 확인 시 자동으로 Pushback 승인이 표시됩니다.<br>
+    <b>선택</b> 항목은 해당 상황에서만 확인 후 진행하세요.
+  </div>
+
+  <button class="reset-btn" id="resetBtn">이 편 초기화</button>
+
+  </div><!-- /workerView -->
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="beacon">✓</div>
+    <h2>Clear for Pushback!</h2>
+    <p>모든 필수 및 선택 확인 절차가 완료되었습니다.<br>Pushback을 진행하십시오.</p>
+    <button class="close-btn" id="modalClose">확인</button>
+  </div>
+</div>
+
+<script>
+// 저장 방식 통합 헬퍼: Claude 미리보기 환경에서는 window.storage를 쓰고,
+// 카카오톡 등으로 받은 파일을 Safari/Chrome에서 직접 열었을 때는 그 기능이
+// 없으므로 표준 브라우저 저장소(localStorage)로 자동 전환한다. 이렇게 하면
+// 아이폰을 포함한 어떤 환경에서 열어도 성명·진행상황이 정상적으로 기억된다.
+const AppStorage = {
+  async get(key){
+    if(window.storage && typeof window.storage.get === 'function'){
+      try{
+        const res = await window.storage.get(key, false);
+        return res ? res.value : null;
+      }catch(e){ /* key not saved yet - normal, fall through */ }
+    }
+    try{
+      return localStorage.getItem(key);
+    }catch(e){
+      return null; // localStorage unavailable (e.g. private browsing) - non-fatal
+    }
+  },
+  async set(key, value){
+    if(window.storage && typeof window.storage.set === 'function'){
+      try{
+        await window.storage.set(key, value, false);
+        return;
+      }catch(e){ /* fall through to localStorage as backup */ }
+    }
+    try{
+      localStorage.setItem(key, value);
+    }catch(e){ /* storage unavailable, keep in-memory only for this session */ }
+  }
+};
+
+const items = [
+  {
+    id:'pre',
+    cat:'req',
+    catLabel:'필수',
+    name:'조업전 확인',
+    sub:'Pushback 책임자 사전 점검',
+    proc:'Pushback 책임자(인터폰맨/Nose감시자)가 전체 조업원, 항공기 이동경로, 주의사항, 통신장비 이상 유무를 사전에 확인한다.'
+  },
+  {
+    id:'start',
+    cat:'req',
+    catLabel:'필수',
+    name:'엔진시동',
+    sub:'운항승무원 요청 대응',
+    proc:'운항승무원 요청 시에만 엔진시동 가능시점 등 지상상황을 전달한다.'
+  },
+  {
+    id:'limit',
+    cat:'opt',
+    catLabel:'선택',
+    name:'엔진시동 제한',
+    sub:'위험요인 · 미끄러움 · 결빙 등',
+    proc:'위험요인·장애물·미끄러움·결빙 등으로 정상 Pushback 기준에 미달 시,\n① 안전 시동구역 이동 또는\n② Pushback 완료 + Parking Brake Set\n중 하나가 확인된 후에만 엔진 시동을 요청하도록 한다.'
+  },
+  {
+    id:'crossbleed',
+    cat:'opt',
+    catLabel:'선택',
+    name:'크로스 블리드 시동',
+    sub:'Cross-Bleed 방식 시동 시',
+    proc:'Cross-Bleed 방식으로 시동한 경우, 남은 엔진 시동은 Pushback 완료·Parking Brake Set·조업원 및 장비의 안전지대 철수가 모두 확인된 이후에만 이루어져야 한다.'
+  },
+  {
+    id:'tow',
+    cat:'opt',
+    catLabel:'선택',
+    name:'항공기 견인',
+    sub:'Pull Forward 진행 시',
+    proc:'Pull Forward 중에는 엔진 미시동 또는 Idle 상태를 유지하도록 요청하고, 가장 낮은 Tractor 기어를 사용하며 제동은 천천히 부드럽게 한다.'
+  },
+  {
+    id:'fault',
+    cat:'req-em',
+    catLabel:'필수 · 비정상',
+    name:'장비고장 / 핀파손',
+    sub:'즉시 대응 절차',
+    proc:'Pushback 즉시 중단 → Tractor 주차 브레이크 체결 → 운항승무원 통보 →\n조업책임자·항공사 통보 → 필요 시 Wheel Chock 설치'
+  }
+];
+
+const state = {};
+items.forEach(it => state[it.id] = false);
+
+// --- 10-flight slot system (한 근무일 최대 10편) ---
+const SLOT_COUNT = 10;
+let slots = [];
+let currentSlot = 0;
+
+function freshSlotData(){
+  const s = { code:'', num:'', cleared:false, clearedTime:null, state:{} };
+  items.forEach(it => s.state[it.id] = false);
+  return s;
+}
+
+function slotsKey(){
+  const now = new Date();
+  return `pushback-slots-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+}
+
+async function saveSlotsNow(){
+  await AppStorage.set(slotsKey(), JSON.stringify(slots));
+}
+
+// Rapid interactions (typing digits, tapping several items in a row) used to
+// fire one storage write PER keystroke/tap, which could trip the platform's
+// storage rate limit during a busy shift. saveSlots() now batches these into
+// a single write ~700ms after the last change. Use saveSlots.flush() right
+// before anything that must be persisted immediately (switching slots,
+// Clear for Pushback, resetting a slot).
+function debounce(fn, delay){
+  let timer = null;
+  const wrapped = (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { timer = null; fn(...args); }, delay);
+  };
+  wrapped.flush = (...args) => {
+    if(timer){ clearTimeout(timer); timer = null; }
+    fn(...args);
+  };
+  return wrapped;
+}
+
+// Personal continuity (this device's own slot data) is saved frequently and
+// cheaply. The SHARED live snapshot that managers read is far more expensive
+// against the rate limit, so it is saved separately, much less often, and
+// only on meaningful state changes (not on every digit typed).
+const saveSlots = debounce(saveSlotsNow, 700);
+
+async function loadSlots(){
+  try{
+    const raw = await AppStorage.get(slotsKey());
+    slots = raw ? JSON.parse(raw) : null;
+  }catch(e){
+    slots = null;
+  }
+  if(!slots || slots.length !== SLOT_COUNT){
+    slots = Array.from({length:SLOT_COUNT}, () => freshSlotData());
+  }
+  // items may have been added/changed since a save; ensure all keys exist
+  slots.forEach(s => items.forEach(it => { if(!(it.id in s.state)) s.state[it.id] = false; }));
+
+  const firstOpen = slots.findIndex(s => !s.cleared);
+  currentSlot = firstOpen >= 0 ? firstOpen : 0;
+  selectSlot(currentSlot);
+}
+
+function slotStatus(s){
+  if(s.cleared) return 'done';
+  const touched = s.code || s.num || Object.values(s.state).some(v => v);
+  return touched ? 'progress' : 'empty';
+}
+
+function renderSlotTabs(){
+  const wrap = document.getElementById('slotTabs');
+  wrap.innerHTML = '';
+  slots.forEach((s, idx) => {
+    const status = slotStatus(s);
+    const btn = document.createElement('div');
+    btn.className = 'slot-tab' + (status !== 'empty' ? ' ' + status : '') + (idx === currentSlot ? ' active' : '');
+    btn.dataset.slot = idx;
+    btn.innerHTML = `<span class="slot-num">${idx + 1}</span>`;
+    wrap.appendChild(btn);
+  });
+  document.getElementById('slotDoneCount').textContent = slots.filter(s => s.cleared).length;
+}
+
+function selectSlot(idx){
+  saveSlots.flush();
+  currentSlot = idx;
+
+  const s = slots[idx];
+  flightCode.value = s.code;
+  flightNum.value = s.num;
+  flightCell.classList.remove('invalid');
+
+  items.forEach(it => { state[it.id] = s.state[it.id]; });
+  openId = null;
+
+  if(s.cleared && s.clearedTime){
+    showFrozenTime(s.clearedTime);
+  }else{
+    resumeClock();
+  }
+
+  render();
+  updateLockState();
+  renderSlotTabs();
+}
+
+document.getElementById('slotTabs').addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-slot]');
+  if(!tab) return;
+  const idx = Number(tab.dataset.slot);
+  if(idx !== currentSlot){ selectSlot(idx); }
+});
+
+const listEl = document.getElementById('list');
+const annunEl = document.getElementById('annun');
+
+function badgeClass(cat){
+  if(cat==='req') return 'req';
+  if(cat==='req-em') return 'req-em';
+  return 'opt';
+}
+
+function render(){
+  listEl.innerHTML = '';
+  annunEl.innerHTML = '';
+
+  items.forEach(it => {
+    const done = state[it.id];
+
+    // annunciator lamp
+    const lamp = document.createElement('div');
+    lamp.className = 'lamp' + (done ? ' done' : '');
+    lamp.innerHTML = `<div class="dot"></div><div class="lbl">${it.name}</div>`;
+    annunEl.appendChild(lamp);
+
+    // card
+    const card = document.createElement('div');
+    card.className = 'card' + (done ? ' done' : '');
+    card.dataset.cat = it.cat;
+    card.id = 'card-' + it.id;
+
+    card.innerHTML = `
+      <div class="card-head" data-toggle="${it.id}">
+        <span class="badge ${badgeClass(it.cat)}">${it.catLabel}</span>
+        <div class="card-main">
+          <div class="item-name">${it.name}</div>
+          <div class="item-sub">${it.sub}</div>
+        </div>
+        <div class="status-icon"></div>
+        <div class="chev">▸</div>
+      </div>
+      <div class="card-body">
+        <div class="card-body-inner">
+          <div class="proc-label">조치절차</div>
+          <div class="proc-text">${it.proc}</div>
+          <button class="confirm-btn" data-confirm="${it.id}">${done ? '확인 완료됨' : '확인 완료'}</button>
+        </div>
+      </div>
+    `;
+    listEl.appendChild(card);
+  });
+
+  updateProgress();
+}
+
+function updateProgress(){
+  const req = items.filter(i => i.cat==='req' || i.cat==='req-em');
+  const doneCount = req.filter(i => state[i.id]).length;
+  document.getElementById('pCount').textContent = `${doneCount}/${req.length}`;
+  document.getElementById('barFill').style.width = (doneCount/req.length*100) + '%';
+}
+
+let openId = null;
+let flightValid = false;
+let operatorName = '';
+
+function updateLockState(){
+  flightValid = /^[A-Z]{2}[0-9]{4}$/.test(getFlightValue());
+  const ready = flightValid && operatorName.trim().length > 0;
+  document.getElementById('list').classList.toggle('locked', !ready);
+  document.getElementById('lockNotice').classList.toggle('show', !ready);
+  document.getElementById('lockNotice').textContent = !operatorName.trim()
+    ? '⚠ 성명과 편명을 입력해야 항목 확인이 가능합니다'
+    : '⚠ 편명을 입력해야 항목 확인이 가능합니다';
+}
+
+listEl.addEventListener('click', (e) => {
+  if(!flightValid || !operatorName.trim()) return;
+
+  const toggle = e.target.closest('[data-toggle]');
+  const confirmBtn = e.target.closest('[data-confirm]');
+
+  if(confirmBtn){
+    const id = confirmBtn.dataset.confirm;
+    state[id] = true;
+    slots[currentSlot].state[id] = true;
+    openId = null;
+    render();
+    renderSlotTabs();
+    saveSlots();
+    checkClearance();
+    return;
+  }
+
+  if(toggle){
+    const id = toggle.dataset.toggle;
+    openId = (openId === id) ? null : id;
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('open'));
+    if(openId){
+      document.getElementById('card-' + openId).classList.add('open');
+    }
+  }
+});
+
+function checkClearance(){
+  const req = items.filter(i => i.cat==='req' || i.cat==='req-em');
+  const allReqDone = req.every(i => state[i.id]);
+  if(allReqDone){
+    showModal();
+  }
+}
+
+function showModal(){
+  freezeAtClearance();
+  const s = slots[currentSlot];
+  s.cleared = true;
+  s.clearedTime = document.getElementById('timeVal').textContent;
+  pushRecord(getFlightValue(), 'Y');
+  renderSlotTabs();
+  saveSlots.flush();
+  document.getElementById('modalOverlay').classList.add('show');
+  playChime();
+}
+
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('modalOverlay').classList.remove('show');
+  const next = slots.findIndex((s, i) => i > currentSlot && !s.cleared);
+  if(next >= 0){
+    selectSlot(next);
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  const enteredFlight = getFlightValue().trim();
+  const wasCleared = !!clearedAt;
+  const anyTouched = items.some(it => state[it.id]);
+  if(enteredFlight && !wasCleared && anyTouched){
+    pushRecord(enteredFlight, 'N');
+  }
+  slots[currentSlot] = freshSlotData();
+  saveSlots.flush();
+  selectSlot(currentSlot);
+});
+
+function getConfirmedOptionals(){
+  return items.filter(it => it.cat === 'opt' && state[it.id]).map(it => it.name);
+}
+
+// Google 스프레드시트로 완료/미완료 기록을 전송한다.
+// apps_script_webhook.gs 를 배포한 뒤 나오는 "웹 앱 URL"로 교체하세요.
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyHV_EwcOYBfXxGcG5MHW3h0aAs0VF1YER1xIMQRZUzk_hy4fEuKSiVhRGNVNz2kivOfw/exec';
+
+let sheetTargetFrame = null;
+function getSheetTargetFrame(){
+  if(!sheetTargetFrame){
+    sheetTargetFrame = document.createElement('iframe');
+    sheetTargetFrame.name = 'sheetTargetFrame';
+    sheetTargetFrame.style.display = 'none';
+    document.body.appendChild(sheetTargetFrame);
+  }
+  return sheetTargetFrame;
+}
+
+function sendToSheet(flight, status, optionals){
+  if(!SHEET_WEBHOOK_URL) return;
+  const now = new Date();
+  const payload = {
+    date: `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`,
+    time: `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+    operator: operatorName || '미상',
+    airport: airportSelect.value,
+    flight: flight,
+    status: status,
+    optionals: (optionals || []).join(', ')
+  };
+
+  // fetch()로 보내면 Apps Script의 302 리다이렉트 과정에서 브라우저가
+  // POST를 GET으로 바꿔버려 doPost가 아닌 doGet만 호출되는 경우가 있다.
+  // 숨겨진 iframe을 대상(target)으로 하는 실제 <form> 제출은 일반 브라우저
+  // 폼 네비게이션 규칙을 따르므로 이 문제 없이 안정적으로 POST가 전달된다.
+  getSheetTargetFrame();
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = SHEET_WEBHOOK_URL;
+  form.target = 'sheetTargetFrame';
+  form.style.display = 'none';
+
+  Object.keys(payload).forEach(key => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = payload[key];
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => form.remove(), 1000);
+}
+
+function pushRecord(flight, status){
+  if(!flight) return;
+  const optionals = getConfirmedOptionals();
+  sendToSheet(flight, status, optionals);
+}
+
+
+// --- clearance chime (Web Audio synth, ascending 3-tone) ---
+function playChime(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [659.25, 783.99, 1046.50]; // E5, G5, C6
+    notes.forEach((freq, idx) => {
+      const t0 = ctx.currentTime + idx * 0.16;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(0.22, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.5);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.55);
+    });
+  }catch(e){ /* audio unavailable, fail silently */ }
+}
+
+// --- live date / time ---
+function pad(n){ return String(n).padStart(2,'0'); }
+let clearedAt = null; // timestamp when Clear for Pushback was confirmed
+
+function updateClock(){
+  if(clearedAt) return; // frozen at confirmation moment
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = pad(now.getMonth()+1);
+  const d = pad(now.getDate());
+  const hh = pad(now.getHours());
+  const mm = pad(now.getMinutes());
+  const ss = pad(now.getSeconds());
+  document.getElementById('dateVal').textContent = `${y}.${m}.${d}`;
+  document.getElementById('timeVal').textContent = `${hh}:${mm}:${ss}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+function freezeAtClearance(){
+  const now = new Date();
+  clearedAt = now;
+  const y = now.getFullYear();
+  const m = pad(now.getMonth()+1);
+  const d = pad(now.getDate());
+  const hh = pad(now.getHours());
+  const mm = pad(now.getMinutes());
+  const ss = pad(now.getSeconds());
+  document.getElementById('dateVal').textContent = `${y}.${m}.${d}`;
+  document.getElementById('timeVal').textContent = `${hh}:${mm}:${ss}`;
+  document.getElementById('timeLabel').textContent = '확인 시각';
+}
+
+function resumeClock(){
+  clearedAt = null;
+  document.getElementById('timeLabel').textContent = 'Time';
+  updateClock();
+}
+
+function showFrozenTime(timeStr){
+  clearedAt = true;
+  const now = new Date();
+  document.getElementById('dateVal').textContent = `${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
+  document.getElementById('timeVal').textContent = timeStr;
+  document.getElementById('timeLabel').textContent = '확인 시각';
+}
+
+// --- flight number input: 2-letter airline code + 4-digit number (e.g. KE 1234) ---
+const flightCode = document.getElementById('flightCode');
+const flightNum = document.getElementById('flightNum');
+const flightCell = document.getElementById('flightCell');
+
+function getFlightValue(){
+  return (flightCode.value + flightNum.value).toUpperCase();
+}
+
+flightCode.addEventListener('change', () => {
+  if(flightCode.value){ flightNum.focus(); }
+  slots[currentSlot].code = flightCode.value;
+  refreshFlightState();
+  renderSlotTabs();
+  saveSlots();
+});
+
+flightNum.addEventListener('input', () => {
+  flightNum.value = flightNum.value.replace(/[^0-9]/g,'').slice(0,4);
+  slots[currentSlot].num = flightNum.value;
+  refreshFlightState();
+  renderSlotTabs();
+  saveSlots();
+});
+
+function refreshFlightState(){
+  const complete = /^[A-Z]{2}[0-9]{4}$/.test(getFlightValue());
+  const anyEntered = flightCode.value.length > 0 || flightNum.value.length > 0;
+  const fullyTyped = flightCode.value.length === 2 && flightNum.value.length === 4;
+  flightCell.classList.toggle('invalid', anyEntered && fullyTyped && !complete);
+  updateLockState();
+}
+
+// --- operator name (persisted per-device so it's remembered across the shift) ---
+const operatorInput = document.getElementById('operatorInput');
+
+async function loadOperatorName(){
+  try{
+    const raw = await AppStorage.get('operator-name');
+    operatorName = raw || '';
+  }catch(e){
+    operatorName = '';
+  }
+  operatorInput.value = operatorName;
+  updateLockState();
+}
+
+const saveOperatorNameDebounced = debounce((name) => {
+  AppStorage.set('operator-name', name);
+}, 700);
+
+operatorInput.addEventListener('input', () => {
+  operatorName = operatorInput.value;
+  updateLockState();
+  saveOperatorNameDebounced(operatorName);
+  saveSlots();
+});
+
+// --- airport code (persisted per-device; defaults to ICN) ---
+const airportSelect = document.getElementById('airportSelect');
+
+async function loadAirportCode(){
+  try{
+    const raw = await AppStorage.get('airport-code');
+    if(raw) airportSelect.value = raw;
+  }catch(e){ /* no saved value yet, keep default ICN */ }
+}
+
+airportSelect.addEventListener('change', () => {
+  AppStorage.set('airport-code', airportSelect.value);
+});
+
+// --- initial load: keep inputs disabled until BOTH the operator name and
+// today's slot data have finished loading, so early keystrokes are never
+// silently overwritten once the async storage fetch resolves.
+async function initApp(){
+  await Promise.all([loadOperatorName(), loadSlots(), loadAirportCode()]);
+  operatorInput.disabled = false;
+  flightCode.disabled = false;
+  flightNum.disabled = false;
+  operatorInput.placeholder = '인터폰맨 성명 입력';
+}
+initApp();
+</script>
+</body>
+</html>
