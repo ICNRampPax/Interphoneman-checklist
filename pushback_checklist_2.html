@@ -3,38 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pushback 체크리스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>인터폰맨의 체크리스트 before Pushback</title>
 <style>
   :root{
-    --bg:#12161b;
-    --bg-grain:#0e1116;
-    --panel:#1b2129;
-    --panel-2:#212933;
-    --border:#2c343e;
-    --text:#eef2f6;
-    --text-dim:#8b96a3;
-    --req:#f2a33d;       /* 필수 - 램프 안전등 오렌지 */
-    --req-dim:#4a3a22;
-    --req-em:#e6483f;    /* 필수(비정상) - 레드 */
-    --req-em-dim:#4a2422;
-    --opt:#4d9de0;       /* 선택 - 유도로 블루 */
-    --opt-dim:#22323e;
-    --ok:#3ecf6e;         /* 완료 - 그린 */
-    --ok-dim:#173322;
+    /* KAS 브랜드 컬러 (한국공항 디자인 가이드라인) */
+    --kas-dark-blue:#051469;
+    --kas-cobalt:#1E64DC;
+    --kas-cyan:#00CDFF;
+    --kas-red:#B81C22;
+    --kas-yellow:#FFCB00;
+
+    --bg:#060a16;
+    --bg-grain:#0b1330;
+    --panel:#0d1530;
+    --panel-2:#121c3d;
+    --border:#263156;
+    --text:#ffffff;
+    --text-dim:#aab3d6;
+    --req:#FFCB00;        /* 필수 - KAS Yellow (주목/안내) */
+    --req-dim:#3d3208;
+    --req-em:#B81C22;     /* 필수(비정상) - KAS Red (경고) */
+    --req-em-dim:#3a1013;
+    --opt:#1E64DC;        /* 선택 - KAS Cobalt Blue */
+    --opt-dim:#12234a;
+    --ok:#00CDFF;         /* 완료 - KAS Cyan Blue */
+    --ok-dim:#073540;
     font-size:16px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(ellipse at top, #1a2028 0%, var(--bg) 55%),
+      radial-gradient(ellipse at top, #0d1530 0%, var(--bg) 55%),
       repeating-linear-gradient(0deg, transparent 0 38px, rgba(255,255,255,0.012) 38px 39px);
     color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Pretendard","Malgun Gothic",sans-serif;
+    font-family:"Noto Sans KR","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
     min-height:100vh;
     padding:18px 14px 60px;
   }
   .wrap{max-width:640px;margin:0 auto;}
+
+  /* KAS supergraphic - brand signature curve, Dark Blue -> Cyan Blue, opaque,
+     bleeding past the frame edges, never rotated, never straight. */
+  .supergraphic{
+    margin:-18px -14px 16px -14px; height:30px; overflow:hidden; pointer-events:none;
+  }
+  .supergraphic svg{display:block; width:calc(100% + 2px); height:100%;}
+
+  .kas-badge{
+    text-align:center; margin-top:18px; font-size:10.5px; color:var(--text-dim);
+    letter-spacing:.04em; font-weight:600;
+  }
+  .kas-badge b{color:var(--opt); font-weight:800; letter-spacing:.06em;}
 
   /* header */
   .hdr{
@@ -46,17 +69,19 @@
     text-transform:uppercase;
   }
   .hdr h1{
-    margin:2px 0 0; font-size:19px; font-weight:800; letter-spacing:-0.01em;
-    display:flex; align-items:baseline; gap:6px; white-space:nowrap;
+    margin:2px 0 0; font-size:17px; font-weight:800; letter-spacing:-0.01em;
+    line-height:1.35;
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px;
   }
   .airport-select{
     appearance:none; -webkit-appearance:none; border:none; outline:none;
     background:var(--req-dim); color:var(--req); font-family:inherit;
     font-size:13px; font-weight:800; letter-spacing:.02em;
     padding:2px 16px 2px 7px; border-radius:6px; cursor:pointer; flex-shrink:0;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0L5 6L10 0Z' fill='%23f2a33d'/></svg>");
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0L5 6L10 0Z' fill='%23FFCB00'/></svg>");
     background-repeat:no-repeat; background-position:right 6px center; background-size:8px 5px;
   }
+  .airport-select option{color:#111; font-weight:600;}
   .hdr .sub{font-size:12.5px;color:var(--text-dim);margin-top:3px;}
 
   .log-toggle{
@@ -111,14 +136,24 @@
     font-size:17px; font-weight:800; color:var(--req); letter-spacing:.06em;
     font-family:inherit; text-transform:uppercase;
   }
+  .flight-code-wrap{position:relative; flex:none; display:inline-flex; align-items:center;}
   .flight-code-select{
-    appearance:none; -webkit-appearance:none; border:none; outline:none;
-    background:transparent; cursor:pointer; width:auto; flex:none;
-    padding:2px 15px 2px 0;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0L5 6L10 0Z' fill='%23f2a33d'/></svg>");
-    background-repeat:no-repeat; background-position:right center; background-size:9px 6px;
+    appearance:none; -webkit-appearance:none; -moz-appearance:none; border:none; outline:none;
+    background:transparent; cursor:pointer; flex:none;
+    width:auto; max-width:78px; padding:2px 16px 2px 0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .flight-code-select:disabled{opacity:.45; cursor:wait; background-image:none;}
+  /* native <option> list renders on a white OS popup in most browsers - force
+     dark, readable text there regardless of the closed field's brand color */
+  .flight-code-select option, .flight-code-select optgroup{color:#111; font-weight:600;}
+  .flight-code-wrap::after{
+    content:''; position:absolute; right:2px; top:50%; margin-top:-3px;
+    width:0; height:0; pointer-events:none;
+    border-left:5px solid transparent; border-right:5px solid transparent;
+    border-top:6px solid var(--req);
+  }
+  .flight-code-select:disabled{opacity:.45; cursor:wait;}
+  .flight-code-wrap.is-disabled::after{border-top-color:var(--text-dim); opacity:.5;}
   .flight-input.flight-num{width:4.2ch; flex:none;}
   .flight-sep{color:var(--text-dim); font-weight:800; font-size:15px;}
   .flight-input::placeholder{color:#4a5560; font-weight:700; letter-spacing:.04em;}
@@ -301,6 +336,18 @@
 <body>
 <div class="wrap">
 
+  <div class="supergraphic" aria-hidden="true">
+    <svg viewBox="0 0 400 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="kasGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#051469"/>
+          <stop offset="100%" stop-color="#00CDFF"/>
+        </linearGradient>
+      </defs>
+      <path d="M -10,26 C 110,4 290,4 410,20 L 410,-10 L -10,-10 Z" fill="url(#kasGrad)"/>
+    </svg>
+  </div>
+
 
   <div class="hdr">
     <div>
@@ -322,7 +369,7 @@
           <option value="HIN">HIN</option>
           <option value="KUV">KUV</option>
         </select>
-        Pushback 체크리스트
+        인터폰맨의 체크리스트 before Pushback
       </h1>
       <div class="sub">항목을 눌러 조치절차를 확인하세요</div>
     </div>
@@ -355,9 +402,10 @@
     <div class="info-cell flight" id="flightCell">
       <div class="info-label">Flight No.</div>
       <div class="flight-input-group">
+        <div class="flight-code-wrap is-disabled" id="flightCodeWrap">
         <select class="flight-input flight-code-select" id="flightCode" disabled>
           <option value="">코드</option>
-          <optgroup label="국내 항공사">
+          <optgroup label="대한민국">
             <option value="KE">KE 대한항공</option>
             <option value="OZ">OZ 아시아나항공</option>
             <option value="LJ">LJ 진에어</option>
@@ -368,31 +416,1065 @@
             <option value="7C">7C 제주항공</option>
             <option value="YP">YP 에어프레미아</option>
             <option value="RF">RF 에어로케이</option>
+            <option value="4H">4H HI AIR</option>
+            <option value="4V">4V FLY GANGWON</option>
+            <option value="EA">EA EAST ASIA AIRLINE</option>
+            <option value="GO">GO Air Korea</option>
+            <option value="H2">H2 HYUNDAI GS</option>
+            <option value="HI">HI HYUNDAI/KIA MOTORS GROUP</option>
+            <option value="HS">HS hanseo univ</option>
+            <option value="HW">HW hanwha</option>
+            <option value="JB">JB BJAS KOREA</option>
+            <option value="JE">JE AVJET ASIA</option>
+            <option value="KA">KA K-AVIATION</option>
+            <option value="KJ">KJ AIR INCHEON</option>
+            <option value="KO">KO KOREA EXPRESS AIR</option>
+            <option value="KS">KS KAS CHTR</option>
+            <option value="KV">KV K-AVIATION</option>
+            <option value="KW">KW KOREA EXPRESS AIR</option>
+            <option value="L8">L8 LGE</option>
+            <option value="O2">O2 OZ Test Code</option>
+            <option value="OE">OE Yeongnam Air</option>
+            <option value="RN">RN AIR POHANG</option>
+            <option value="RR">RR TEST</option>
+            <option value="ST">ST SK CHTR</option>
+            <option value="SX">SX Star Airport</option>
+            <option value="WE">WE PARATA AIR</option>
+            <option value="XE">XE KOREA EXPRESS AIR</option>
+            <option value="XU">XU SUM AIR</option>
           </optgroup>
-          <optgroup label="해외 항공사">
-            <option value="DL">DL Delta</option>
-            <option value="UA">UA United</option>
-            <option value="AA">AA American</option>
-            <option value="AF">AF Air France</option>
-            <option value="KL">KL KLM</option>
-            <option value="CZ">CZ China Southern</option>
-            <option value="MU">MU China Eastern</option>
-            <option value="MF">MF Xiamen Air</option>
-            <option value="GA">GA Garuda Indonesia</option>
-            <option value="VN">VN Vietnam Airlines</option>
+          <optgroup label="가나">
+            <option value="O4">O4 Antrak Air</option>
+          </optgroup>
+          <optgroup label="가봉">
+            <option value="G8">G8 Air Service Gabon</option>
+            <option value="GY">GY Gabon Airlines</option>
+          </optgroup>
+          <optgroup label="가이아나 협동 공화국">
+            <option value="2U">2U Air Guine Express</option>
+            <option value="G0">G0 Ghana International Airlines</option>
+          </optgroup>
+          <optgroup label="과테말라">
+            <option value="GU">GU AVIATECA, S.A.</option>
+            <option value="L3">L3 DHL de Guatemala</option>
+          </optgroup>
+          <optgroup label="괌">
+            <option value="CS">CS Continental Micronesia, Inc.</option>
+          </optgroup>
+          <optgroup label="그리스">
+            <option value="A2">A2 Astra Airlines</option>
+            <option value="A3">A3 Aegean Airlines</option>
+            <option value="GQ">GQ Sky Express</option>
+          </optgroup>
+          <optgroup label="그린랜드">
+            <option value="GL">GL Air Greenland</option>
+          </optgroup>
+          <optgroup label="나미비아">
+            <option value="SW">SW Air Namibia</option>
+          </optgroup>
+          <optgroup label="나우루 공화국">
+            <option value="ON">ON Our Airlines</option>
+          </optgroup>
+          <optgroup label="나이지리아">
+            <option value="4W">4W Allied Air Limited</option>
+            <option value="5B">5B Chanchangi Airlines</option>
+            <option value="AJ">AJ AeroContractors Company of Nigeria</option>
+            <option value="OJ">OJ Overland Airways</option>
+            <option value="Z7">Z7 ADC Airlines</option>
+          </optgroup>
+          <optgroup label="남아프리카">
+            <option value="4Z">4Z AirLink</option>
+            <option value="5Z">5Z Cemair</option>
+            <option value="FA">FA Safair (Proprietary) Ltd.</option>
+            <option value="MN">MN Kulula.com</option>
+            <option value="SA">SA South African Airways</option>
+            <option value="YB">YB South African Express Airways</option>
+            <option value="Z9">Z9 Aero Zambia</option>
+          </optgroup>
+          <optgroup label="네덜란드">
+            <option value="HV">HV Transavia</option>
+            <option value="KL">KL KLM Royal Dutch Airlines</option>
+            <option value="MP">MP Martinair Holland</option>
+            <option value="OR">OR Arkefly</option>
+            <option value="WD">WD Amsterdam Airlines</option>
+          </optgroup>
+          <optgroup label="네덜란드령 앤틸리스연방 아루바">
+            <option value="W6">W6 Wizz AIr</option>
+          </optgroup>
+          <optgroup label="네팔">
+            <option value="RA">RA Royal Nepal Airlines</option>
+          </optgroup>
+          <optgroup label="노르웨이">
+            <option value="BU">BU SAS Braathens</option>
+            <option value="DY">DY Norwegian Air Shuttle</option>
+            <option value="WF">WF Wideroe&#x27;s Flyveselskap A.S.</option>
+          </optgroup>
+          <optgroup label="뉴질랜드">
+            <option value="NZ">NZ Air New Zealand</option>
+            <option value="SJ">SJ Freedom Air International</option>
+          </optgroup>
+          <optgroup label="뉴칼레도니아 - 프랑스령">
+            <option value="SB">SB Air Caledonie International</option>
+          </optgroup>
+          <optgroup label="대만">
+            <option value="AE">AE Mandarin Airlines</option>
+            <option value="B7">B7 UNI Airways(GLORY)</option>
+            <option value="BR">BR EVA Airways</option>
             <option value="CI">CI China Airlines</option>
-            <option value="BR">BR EVA Air</option>
-            <option value="JL">JL Japan Airlines</option>
-            <option value="NH">NH ANA</option>
-            <option value="SQ">SQ Singapore Airlines</option>
-            <option value="TG">TG Thai Airways</option>
-            <option value="CX">CX Cathay Pacific</option>
-            <option value="QR">QR Qatar Airways</option>
-            <option value="EK">EK Emirates</option>
-            <option value="TK">TK Turkish Airlines</option>
+            <option value="FE">FE Far Eastern Air Transport</option>
+            <option value="GE">GE TransAsia Airways Corporation</option>
+            <option value="IT">IT Tigerair Taiwan</option>
+            <option value="JX">JX STARLUX AIRLINES</option>
+            <option value="ZV">ZV V AIR</option>
+          </optgroup>
+          <optgroup label="덴마크">
+            <option value="DJ">DJ Maersk Air Cargo A/S</option>
+            <option value="DK">DK MyTravel Airways</option>
+            <option value="DM">DM Maersk Air</option>
+            <option value="DX">DX DAT Danish Air Transport</option>
+            <option value="NB">NB Sterling European</option>
+            <option value="QI">QI Cimber Air</option>
+          </optgroup>
+          <optgroup label="독일">
+            <option value="3S">3S Aero Logic</option>
+            <option value="4R">4R HAMBURG INTERNATIONAL</option>
+            <option value="4U">4U Germanwings</option>
+            <option value="4Y">4Y Eurowings Discover</option>
+            <option value="6U">6U ACG Air Cargo Germany</option>
+            <option value="7E">7E Sylt Air</option>
+            <option value="8W">8W Private Wings</option>
+            <option value="AB">AB Air Berlin</option>
+            <option value="AU">AU GERMAN WINGS</option>
+            <option value="C9">C9 Cirrus Airlines</option>
+            <option value="CL">CL Lufthansa CityLine GmbH</option>
+            <option value="DE">DE Condor</option>
+            <option value="DI">DI DBA</option>
+            <option value="EW">EW Eurowings</option>
+            <option value="HF">HF Hapag Lloyd</option>
+            <option value="HR">HR Hahn Air Lines</option>
+            <option value="IF">IF RED ANGLE, IATA CODE - F3</option>
             <option value="LH">LH Lufthansa</option>
+            <option value="LT">LT LTU International Airways</option>
+            <option value="M2">M2 MHS Aviation</option>
+            <option value="QY">QY EAT Leipzig</option>
+            <option value="X3">X3 Hapag-Lloyd Express</option>
+          </optgroup>
+          <optgroup label="라오스">
+            <option value="QV">QV Lao Airlines</option>
+          </optgroup>
+          <optgroup label="라트비아">
+            <option value="6Y">6Y SmartLynx Airlines</option>
+            <option value="BT">BT Air Baltic</option>
+            <option value="GV">GV Riga Airlines</option>
+          </optgroup>
+          <optgroup label="러시아">
+            <option value="2D">2D Alania Airlines</option>
+            <option value="3R">3R Moskovia Airlines</option>
+            <option value="4B">4B TUPOLEV AIR[AVIASTAR - TU]</option>
+            <option value="5N">5N Aeroflot-Nord</option>
+            <option value="6I">6I Aviast</option>
+            <option value="6W">6W Saravia Airlines</option>
+            <option value="BO">BO AirBridge Cargo</option>
+            <option value="D8">D8 Diamond Sakha Airlines</option>
+            <option value="D9">D9 Aeroflot-Don</option>
+            <option value="EO">EO Pegas Fly</option>
+            <option value="FV">FV Rossiya Airlines JSC</option>
+            <option value="G7">G7 KAPO</option>
+            <option value="HZ">HZ AURORA AIR</option>
+            <option value="N4">N4 NORDWIND Airlines</option>
+            <option value="NN">NN VIM AIRLINES</option>
+            <option value="P7">P7 East Line Airlines</option>
+            <option value="R2">R2 Orenburg Airlines</option>
+            <option value="R3">R3 Yakutia Airlines</option>
+            <option value="R4">R4 Rossiya(FV)</option>
+            <option value="RU">RU Air Bridge Cargo Airlines</option>
+            <option value="S7">S7 Siberia Airlines dba. S7 Airlines</option>
+            <option value="SU">SU Aeroflot Russian Airlines</option>
+            <option value="U6">U6 Ural Airlines</option>
+            <option value="UN">UN Transaero Airlines</option>
+            <option value="UT">UT UTair Aviation</option>
+            <option value="UZ">UZ TESIS</option>
+            <option value="V8">V8 ATRAN-Aviatrans Cargo Airlines</option>
+            <option value="VI">VI Volga-Dnepr Airline Joint Stock</option>
+            <option value="YQ">YQ Polet Airlines</option>
+          </optgroup>
+          <optgroup label="레바논">
+            <option value="ME">ME Middle East Airlines AirLiban</option>
+            <option value="TL">TL Trans-Mediterranean Airways</option>
+          </optgroup>
+          <optgroup label="루마니아">
+            <option value="0B">0B Blue Air</option>
+            <option value="RO">RO TAROM - Transporturile Aeriene Romane</option>
+            <option value="V3">V3 Carpatair S.A.</option>
+            <option value="Y1">Y1 Blue Air</option>
+          </optgroup>
+          <optgroup label="룩셈부르크">
+            <option value="CV">CV Cargolux Airlines International</option>
+            <option value="LG">LG Luxair</option>
+          </optgroup>
+          <optgroup label="르완다">
+            <option value="WB">WB Rwandair Express</option>
+          </optgroup>
+          <optgroup label="리비아">
+            <option value="0G">0G Ghadames Air Transport</option>
+            <option value="5S">5S Global Aviation and Services</option>
+            <option value="8U">8U Afriqiyah Airways</option>
+            <option value="LN">LN Libyan Arab Airlines</option>
+          </optgroup>
+          <optgroup label="마다가스카르">
+            <option value="MD">MD Air Madagascar</option>
+          </optgroup>
+          <optgroup label="마샬군도">
+            <option value="CW">CW Air Marshall Islands, Inc.</option>
+          </optgroup>
+          <optgroup label="마카오">
+            <option value="NX">NX Air Macau</option>
+          </optgroup>
+          <optgroup label="마케도니아">
+            <option value="3D">3D Palair Macedonia</option>
+            <option value="IN">IN Macedonian Airlnes</option>
+          </optgroup>
+          <optgroup label="말라위">
+            <option value="QM">QM Air Malawi</option>
+          </optgroup>
+          <optgroup label="말레이시아">
+            <option value="3G">3G Gading Sari Aviation Services</option>
+            <option value="9A">9A Eaglexpress Air</option>
+            <option value="AK">AK AirAsia Berhad</option>
+            <option value="FY">FY Firefly</option>
+            <option value="MH">MH Malaysia Airlines</option>
+            <option value="OD">OD Batik Air Malaysia</option>
+          </optgroup>
+          <optgroup label="멕시코">
+            <option value="4O">4O Interjet</option>
+            <option value="5D">5D Aeromxico Connect</option>
+            <option value="6A">6A AVIACSA</option>
+            <option value="6R">6R Aerotransporte de Cargr Union</option>
+            <option value="A7">A7 Awesome Cargo</option>
+            <option value="AM">AM Aeromexico</option>
+            <option value="E7">E7 Estafeta Carga Aerea</option>
+            <option value="JR">JR Aero California</option>
+            <option value="M7">M7 Mas air Cargo</option>
+            <option value="MX">MX Compania Mexicana de Aviacion</option>
+            <option value="UJ">UJ MAGNICHARTERS</option>
+            <option value="VB">VB Viva Aerobus</option>
+            <option value="VW">VW Aeromar</option>
+            <option value="Y4">Y4 Volaris</option>
+          </optgroup>
+          <optgroup label="모로코">
+            <option value="3O">3O Air Arabia Maroc</option>
+            <option value="8A">8A Atlas Blue</option>
+            <option value="AT">AT Royal Air Maroc</option>
+          </optgroup>
+          <optgroup label="모리셔스">
+            <option value="MK">MK Air Mauritius</option>
+          </optgroup>
+          <optgroup label="모잠비크">
+            <option value="TM">TM LAM - Linhas Aereas de Mocambique</option>
+          </optgroup>
+          <optgroup label="몰도바">
+            <option value="2M">2M Moldavian Airlines</option>
+            <option value="9U">9U Air Moldova</option>
+            <option value="RM">RM Air Moldova International</option>
+          </optgroup>
+          <optgroup label="몰타">
+            <option value="5M">5M Hi Fly Malta</option>
+            <option value="DB">DB Maleth Aero</option>
+            <option value="KM">KM Air Malta</option>
+            <option value="ML">ML Maleth Aero</option>
+          </optgroup>
+          <optgroup label="몽골">
+            <option value="M0">M0 Aero Mongolia</option>
+            <option value="MG">MG EZINIS AIRWAYS</option>
+            <option value="MR">MR Hunnu Airlines</option>
+            <option value="OM">OM MIAT - Mongolian Airlines</option>
+            <option value="XF">XF GREAT MONGOLIAN</option>
+          </optgroup>
+          <optgroup label="미국">
+            <option value="2F">2F Frontier Alaska</option>
+            <option value="2Q">2Q Air Cargo Carriers</option>
+            <option value="3A">3A Alliance Airlines</option>
+            <option value="3K">3K Everts Air Cargo</option>
+            <option value="3M">3M Gulfstream International</option>
+            <option value="5A">5A Alpine Air Express</option>
+            <option value="5X">5X UPS (United Parcel Service Company)</option>
+            <option value="5Y">5Y Atlas Air</option>
+            <option value="7Z">7Z Laker Airways (Bahamas) Limited</option>
+            <option value="9E">9E Northwest Airlink(Pinnacle Airliens)</option>
+            <option value="9K">9K Cape Air</option>
+            <option value="9S">9S Southern Air Transport</option>
+            <option value="AA">AA American Airlines</option>
+            <option value="AQ">AQ Aloha Airlines</option>
+            <option value="AS">AS Alaska Airlines</option>
+            <option value="AX">AX Air Aurora</option>
+            <option value="B6">B6 Jetblue Airways</option>
+            <option value="BB">BB Baltia Air Lines(BJ)</option>
+            <option value="BJ">BJ Baltia Air Lines</option>
+            <option value="CO">CO Continental Air Lines</option>
+            <option value="CP">CP Compass airlines</option>
+            <option value="D2">D2 DYNAMIC AIR</option>
+            <option value="DG">DG Custom Air Transport</option>
+            <option value="DL">DL Delta Air Lines</option>
+            <option value="EJ">EJ Executive Jet Aviation</option>
+            <option value="EM">EM Empire Airlines</option>
+            <option value="EV">EV Atlantic Southeast Airlines</option>
+            <option value="EZ">EZ Evergreen International Airlines</option>
+            <option value="F9">F9 Frontier Airlines</option>
+            <option value="FL">FL AirTran Airways</option>
+            <option value="FX">FX Federal Express</option>
+            <option value="G4">G4 Allegiant Air</option>
+            <option value="GB">GB ABX Air</option>
+            <option value="GG">GG Sky Lease Cargo</option>
+            <option value="GR">GR Gemini Air Cargo</option>
+            <option value="H6">H6 Hageland Aviation Services</option>
+            <option value="HA">HA Hawaiian Airlines</option>
+            <option value="HP">HP America West Airlines</option>
+            <option value="K4">K4 Kalitta Air</option>
+            <option value="KD">KD Western Global Airlines</option>
+            <option value="L2">L2 Lynden Air Cargo</option>
+            <option value="M6">M6 Amerijet International Airlines</option>
+            <option value="MQ">MQ American Eagle</option>
+            <option value="MY">MY Maxjet Airways</option>
+            <option value="N8">N8 National Airlines</option>
+            <option value="NA">NA North American Aorlines</option>
+            <option value="NC">NC Northern Air Cargo</option>
+            <option value="NK">NK Spirit Airlines</option>
+            <option value="NW">NW Northwest Airlines, Inc.</option>
+            <option value="OH">OH Delta Connection Comair</option>
+            <option value="OO">OO SkyWest Airlines</option>
+            <option value="OW">OW Executive Airlines</option>
+            <option value="P6">P6 Trans Air</option>
+            <option value="P9">P9 Asia Pacific Airlines</option>
+            <option value="PO">PO Polar Air Cargo</option>
+            <option value="QQ">QQ Reno Air</option>
+            <option value="QX">QX Horizon Air</option>
+            <option value="RD">RD Ryan International Airlines</option>
+            <option value="SM">SM Sunworld International Airlines</option>
+            <option value="SY">SY Sun Country Airlines</option>
+            <option value="U5">U5 USA 3000</option>
+            <option value="UA">UA United Airlines, Inc.</option>
+            <option value="US">US US Airways, Inc.</option>
+            <option value="V2">V2 Vision Airlines</option>
+            <option value="VX">VX Virgin America</option>
+            <option value="WN">WN Southwest Airlines</option>
+            <option value="WO">WO World Airways</option>
+            <option value="X9">X9 Omni Air International</option>
+            <option value="YV">YV Mesa Airlines</option>
+            <option value="YX">YX Republic Airways</option>
+            <option value="ZS">ZS Paramount Aerospace Systems</option>
+            <option value="ZW">ZW Air Wisconsin</option>
+          </optgroup>
+          <optgroup label="미얀마">
+            <option value="8M">8M Myanmar Airways International</option>
+            <option value="GM">GM Golden Myanmar Airlines</option>
+            <option value="W9">W9 Air Bagan</option>
+          </optgroup>
+          <optgroup label="바누아투">
+            <option value="NF">NF Air Vanuatu (Operations) Limited</option>
+          </optgroup>
+          <optgroup label="바레인">
+            <option value="2B">2B Bahrain Air</option>
+            <option value="ES">ES DHL International E.C.</option>
+            <option value="GF">GF Gulf Air Company G.S.C.</option>
+          </optgroup>
+          <optgroup label="바하마">
+            <option value="UP">UP Bahamas air</option>
+          </optgroup>
+          <optgroup label="방글라데시">
+            <option value="3Z">3Z Zoom Airways</option>
+            <option value="5Q">5Q Best Air</option>
+            <option value="BG">BG Biman Bangladesh Airlines</option>
+          </optgroup>
+          <optgroup label="버뮤다">
+            <option value="6T">6T LONGTAIL AVIATION</option>
+          </optgroup>
+          <optgroup label="베네주엘라">
+            <option value="KG">KG LINEA AEREAS IAACA(LAI)</option>
+            <option value="R7">R7 Aserca Airlines (Aero Servicios Carabobo)</option>
+            <option value="S3">S3 Santa Barbara Airlines</option>
+            <option value="VH">VH Aeropostal Alas de Venezuela</option>
+          </optgroup>
+          <optgroup label="베트남">
+            <option value="9G">9G Sun PhuQuoc AIRWAYS</option>
+            <option value="BL">BL JETSTAR Pacific Airlines</option>
+            <option value="QH">QH Bamboo Airways</option>
+            <option value="VJ">VJ VietJet Air</option>
+            <option value="VN">VN Vietnam Airlines(HVN)</option>
+            <option value="VU">VU Vietravel Airlines</option>
+          </optgroup>
+          <optgroup label="벨기에">
+            <option value="2H">2H European Airlines</option>
+            <option value="3V">3V TNT Airways S.A.</option>
+            <option value="FQ">FQ Thomas Cook Airlines Belgium</option>
+            <option value="SN">SN Brussets Airlines</option>
+            <option value="TB">TB Jetairfly</option>
+            <option value="TV">TV Virgin Express</option>
+          </optgroup>
+          <optgroup label="벨로루시 공화국">
+            <option value="AL">AL Transaviaexport Airlines</option>
+            <option value="B2">B2 Belavia</option>
+          </optgroup>
+          <optgroup label="보츠와나">
+            <option value="BP">BP Air Botswana</option>
+          </optgroup>
+          <optgroup label="볼리비아">
+            <option value="5L">5L AeroSur</option>
+            <option value="LB">LB Lloyd Aereo Boliviano S.A. (LAB)</option>
+          </optgroup>
+          <optgroup label="부르키나파소">
+            <option value="2J">2J Air Burkina</option>
+          </optgroup>
+          <optgroup label="부정기">
+            <option value="CH">CH PRVT Charter</option>
+          </optgroup>
+          <optgroup label="불가리아">
+            <option value="DU">DU Hemus Air</option>
+            <option value="FB">FB Bulgaria Air</option>
+          </optgroup>
+          <optgroup label="브라질">
+            <option value="6M">6M Azul Linhas Aereas Brasileiras</option>
+            <option value="C7">C7 Rico Linhas Aereas - RLA</option>
+            <option value="G3">G3 GOL Transportes Aeros</option>
+            <option value="JJ">JJ LATAM Linhas Aereas</option>
+            <option value="LC">LC Varig Logistica S/A</option>
+            <option value="M3">M3 ABSA Cargo</option>
+            <option value="P8">P8 LINHAS AEREAS PANTANAL</option>
+            <option value="VP">VP Viacao Aerea Sao Paulo, S.A. (VASP)</option>
+          </optgroup>
+          <optgroup label="브루나이">
+            <option value="BI">BI Royal Brunei Airlines Sdn. Bhd.</option>
+          </optgroup>
+          <optgroup label="사모아">
+            <option value="PH">PH Polynesian Limited</option>
+          </optgroup>
+          <optgroup label="사우디아라비아">
+            <option value="SV">SV Saudi Arabian Airlines</option>
+            <option value="XY">XY Flynas</option>
+          </optgroup>
+          <optgroup label="세르비아">
+            <option value="YM">YM Montenegro Airlines</option>
+          </optgroup>
+          <optgroup label="세이셸">
+            <option value="HM">HM Air Seychelles Limited</option>
+          </optgroup>
+          <optgroup label="세인트루시아">
+            <option value="UU">UU Air Austral</option>
+          </optgroup>
+          <optgroup label="솔로몬아일랜드">
+            <option value="IE">IE Solomon Airlines</option>
+          </optgroup>
+          <optgroup label="수단">
+            <option value="SD">SD Sudan Airways Co. Ltd.</option>
+          </optgroup>
+          <optgroup label="수리남">
+            <option value="PY">PY Surinam Airways</option>
+          </optgroup>
+          <optgroup label="스리랑카">
+            <option value="8D">8D Expo Aviation</option>
+            <option value="MJ">MJ Mihin Lanka airline</option>
+            <option value="QL">QL Aero Lanka</option>
+            <option value="UL">UL SriLankan Airlines Limited</option>
+          </optgroup>
+          <optgroup label="스웨덴">
+            <option value="2N">2N Next Jet</option>
+            <option value="4P">4P Viking Airlines</option>
+            <option value="6B">6B Britannia Airways AB</option>
+            <option value="8N">8N Barents AirLink</option>
+            <option value="IH">IH Falcon Air</option>
+            <option value="JZ">JZ Avia Express</option>
+            <option value="SH">SH FlyMe</option>
+            <option value="SK">SK Scandinavian Airlines System (SAS)</option>
+            <option value="TF">TF Malmo Aviation</option>
+            <option value="TQ">TQ Transwede Airways AB</option>
+          </optgroup>
+          <optgroup label="스위스">
+            <option value="2L">2L Helvetic Airways</option>
+            <option value="7T">7T Air Glaciers</option>
+            <option value="8R">8R Edelweiss Air</option>
+            <option value="DS">DS Easyjet Switzerland</option>
+            <option value="F7">F7 Darwin Airline</option>
+            <option value="FP">FP Aeroleasing</option>
+            <option value="LX">LX Swiss International Airlines</option>
+            <option value="PP">PP JET AVIATION BUSINESS JETS</option>
+            <option value="ZC">ZC Royal Swazi National Airways Corp.</option>
+          </optgroup>
+          <optgroup label="스페인">
+            <option value="3C">3C Calima Aviacion</option>
+            <option value="EB">EB Wamos Air, S.A. (Pullman)</option>
+            <option value="IB">IB Iberia - Lineas Aereas de Espana</option>
+            <option value="JK">JK Spanair S.A.</option>
+            <option value="NT">NT Binter Canarias</option>
+            <option value="PL">PL WAMOS AIR</option>
+            <option value="TY">TY Orbest Orizonia Airlines S.A.</option>
+            <option value="UX">UX Air Europa Lineas Aereas, S.A.</option>
+            <option value="VY">VY Vueling</option>
+            <option value="XG">XG Clickair</option>
+            <option value="YW">YW Air Nostrum</option>
+          </optgroup>
+          <optgroup label="슬로바키아">
+            <option value="6Q">6Q Slovak Airlines</option>
+            <option value="NE">NE SkyEurope Airlines</option>
+          </optgroup>
+          <optgroup label="슬로베니아">
+            <option value="JP">JP Adria Airways</option>
+          </optgroup>
+          <optgroup label="시리아">
+            <option value="RB">RB Syrian Arab Airlines</option>
+          </optgroup>
+          <optgroup label="시에라리온">
+            <option value="2O">2O Air Salone</option>
+          </optgroup>
+          <optgroup label="싱가포르">
+            <option value="MI">MI SilkAir</option>
+            <option value="SQ">SQ Singapore Airlines</option>
+            <option value="TR">TR Scoot TigerAir Pte Ltd</option>
+            <option value="TZ">TZ Scoot private Limited</option>
+          </optgroup>
+          <optgroup label="아랍에미레이트">
+            <option value="2E">2E AVE.com</option>
+            <option value="EK">EK Emirates</option>
+            <option value="EY">EY Etihad Airways</option>
+            <option value="FZ">FZ Flydubai</option>
+            <option value="G9">G9 Air Arabia</option>
+            <option value="P3">P3 FLY AVE</option>
+            <option value="RG">RG Rotana Jet Aviation</option>
+          </optgroup>
+          <optgroup label="아르메니아">
+            <option value="QN">QN Air Armenia</option>
+            <option value="U8">U8 Armavia</option>
+          </optgroup>
+          <optgroup label="아르헨티나">
+            <option value="4M">4M LATAM Airlines Argentina</option>
+            <option value="A4">A4 Southern Winds S.A.</option>
+            <option value="AR">AR Aerolineas Argentinas</option>
+            <option value="FS">FS STAF Airlines</option>
+            <option value="OY">OY Andes Lineas Aereas</option>
+          </optgroup>
+          <optgroup label="아이슬랜드">
+            <option value="BF">BF Bluebird Cargo</option>
+            <option value="CC">CC Air Atlanta Icelandic</option>
+            <option value="FI">FI Icelandair</option>
+            <option value="GX">GX JETX AIRLINES</option>
+          </optgroup>
+          <optgroup label="아이티">
+            <option value="2T">2T Haiti Ambassador Airlines</option>
+          </optgroup>
+          <optgroup label="아일랜드">
+            <option value="AG">AG Air Contractors</option>
+            <option value="EI">EI Aer Lingus</option>
+            <option value="FR">FR Ryanair</option>
+            <option value="RE">RE Aer Arann</option>
+            <option value="WX">WX Cityjet</option>
+          </optgroup>
+          <optgroup label="아제르바이잔">
+            <option value="3T">3T Turan Air</option>
+            <option value="7L">7L Silk Way West Airlines</option>
+            <option value="J2">J2 Azerbaijan Airlines</option>
+          </optgroup>
+          <optgroup label="아프카니스탄">
+            <option value="FG">FG Ariana Afghan Airlines</option>
+            <option value="HN">HN Afghan Jet International</option>
+            <option value="RQ">RQ Kam Air</option>
+          </optgroup>
+          <optgroup label="알바니아">
+            <option value="LZ">LZ Belle Air</option>
+          </optgroup>
+          <optgroup label="알제리아">
+            <option value="AH">AH Air Algerie</option>
+            <option value="SF">SF Tassili Airlines</option>
+          </optgroup>
+          <optgroup label="앙골라">
+            <option value="DT">DT TAAG - Linhas Aereas de Angola</option>
+          </optgroup>
+          <optgroup label="에리트레아">
+            <option value="B8">B8 Eritrean Airlines</option>
+          </optgroup>
+          <optgroup label="에스토니아공화국">
+            <option value="U3">U3 Avies</option>
+          </optgroup>
+          <optgroup label="에콰도르">
+            <option value="2A">2A Aeroservicios Ecuatiorianos CA</option>
+            <option value="2K">2K Aeroqal Aerolineas Galapagos</option>
+            <option value="EQ">EQ TAME</option>
+            <option value="EU">EU Ecuatoriana Airlines</option>
+            <option value="XL">XL LATAM Airlines Ecuador</option>
+          </optgroup>
+          <optgroup label="에티오피아">
+            <option value="ET">ET Ethiopian Airlines</option>
+          </optgroup>
+          <optgroup label="엘사라도르">
+            <option value="TA">TA Taca International Airlines, S.A.</option>
+          </optgroup>
+          <optgroup label="영국">
+            <option value="5W">5W Astraeus</option>
+            <option value="6G">6G Air Wales</option>
+            <option value="7M">7M Air Atlantique</option>
+            <option value="BA">BA British Airways</option>
+            <option value="BE">BE Jersey European Airways Limited</option>
+            <option value="BM">BM bmi Regional</option>
+            <option value="BS">BS British International Helicopters</option>
+            <option value="D0">D0 DHL Air Limited</option>
+            <option value="DP">DP First Choice Airways</option>
+            <option value="JN">JN XL Airways</option>
+            <option value="KI">KI Air Atlantique</option>
+            <option value="LS">LS Channel Express[jet2]</option>
+            <option value="MT">MT Thomas Cook Airlines</option>
+            <option value="U2">U2 Easyjet</option>
+            <option value="VS">VS Virgin Atlantic Airways Limited</option>
+            <option value="XH">XH aviOne Global Aviation Services</option>
+            <option value="Y7">Y7 Silverjet Cargo/Flyjet</option>
+            <option value="ZT">ZT Titan Airways Limited</option>
+          </optgroup>
+          <optgroup label="예멘">
+            <option value="IY">IY Yemenia - Yemen Airways</option>
+          </optgroup>
+          <optgroup label="오만">
+            <option value="WY">WY Oman Air</option>
+          </optgroup>
+          <optgroup label="오스트레일리아">
+            <option value="AO">AO Australian Airlines</option>
+            <option value="IM">IM Australia Asia Airlines</option>
+            <option value="JQ">JQ Jetstar</option>
+            <option value="QF">QF Qantas</option>
+            <option value="VQ">VQ Impulse Airlines</option>
+          </optgroup>
+          <optgroup label="오스트리아">
+            <option value="2W">2W Welcome Air</option>
+            <option value="3L">3L InterSky</option>
+            <option value="A6">A6 Air Alps Aviation</option>
+            <option value="HG">HG FlyNiki</option>
+            <option value="NG">NG Lauda Air Luftfahrt AG</option>
+            <option value="OS">OS Austrian Airlines</option>
+            <option value="VO">VO Austrian Arrows</option>
+          </optgroup>
+          <optgroup label="온두라스">
+            <option value="WC">WC Islena Airlines</option>
+          </optgroup>
+          <optgroup label="요르단">
+            <option value="RJ">RJ Royal Jordanian</option>
+          </optgroup>
+          <optgroup label="우간다">
+            <option value="Y2">Y2 Alliance Air</option>
+          </optgroup>
+          <optgroup label="우루과이">
+            <option value="PU">PU Pluna Lineas Aereas Uruguayas S.A.</option>
+          </optgroup>
+          <optgroup label="우즈베키스탄">
+            <option value="C6">C6 My Freighter &amp; Centrum Air</option>
+            <option value="HH">HH Qanot Sharq Airlines</option>
+            <option value="HY">HY Uzbekistan Airways</option>
+          </optgroup>
+          <optgroup label="우크라이나">
+            <option value="3N">3N Air Urga</option>
+            <option value="5U">5U Challenge Aero</option>
+            <option value="5V">5V Lviv Airlines</option>
+            <option value="7D">7D Donbassaero Airlines</option>
+            <option value="M9">M9 Motor Sich Airlines</option>
+            <option value="PQ">PQ SKYUP Airlines</option>
+            <option value="PS">PS Ukraine International Airlines</option>
+            <option value="T6">T6 Tavrey Airlines</option>
+            <option value="VV">VV Aerosvit Airlines</option>
+            <option value="Z6">Z6 DNIPROAVIA</option>
+          </optgroup>
+          <optgroup label="유고슬라비아">
+            <option value="JU">JU JAT Airways</option>
+          </optgroup>
+          <optgroup label="이라크">
+            <option value="IA">IA Iraqi Airways</option>
+          </optgroup>
+          <optgroup label="이란 이슬람 공화국">
+            <option value="EP">EP Iran Aseman Airlines</option>
+            <option value="IR">IR Iran Air</option>
+            <option value="RV">RV Caspian Airlines Service Company Ltd.</option>
+            <option value="W5">W5 Mahan Airlines</option>
+            <option value="Y9">Y9 Kish Airlines</option>
+          </optgroup>
+          <optgroup label="이스라엘">
+            <option value="5C">5C Cargo Air Lines</option>
+            <option value="6H">6H Israir Airlines and Tourism Ltd.</option>
+            <option value="IZ">IZ Arkia - Israeli Airlines</option>
+            <option value="LY">LY El Al Israel Airlines</option>
+          </optgroup>
+          <optgroup label="이집트">
+            <option value="4D">4D Air Sinai</option>
+            <option value="7Q">7Q Shorouk Air</option>
+            <option value="MC">MC Air Cairo</option>
+            <option value="MS">MS Egypt air</option>
+          </optgroup>
+          <optgroup label="이탈리아">
+            <option value="8I">8I MyAir</option>
+            <option value="9X">9X ITALI AIRLINES</option>
+            <option value="AP">AP Air One</option>
+            <option value="AZ">AZ Alitalia</option>
+            <option value="BV">BV Blue Panorama Airlines</option>
+            <option value="C8">C8 Cargolux Italia</option>
+            <option value="E8">E8 ALPI Eagles S.p.A.</option>
+            <option value="EN">EN Air Dolomiti</option>
+            <option value="IG">IG Meridiana S.p.A.</option>
+            <option value="L4">L4 Lauda Air S.p.A.</option>
+            <option value="NO">NO MOONFLOWER</option>
+            <option value="VA">VA Virgin Australia International Airlines Pty Ltd.</option>
+            <option value="XM">XM Alitalia Express</option>
+            <option value="XZ">XZ Aeroitalia</option>
+          </optgroup>
+          <optgroup label="인도">
+            <option value="6E">6E IndiGo Airlines</option>
+            <option value="9W">9W Jet Airways</option>
+            <option value="AI">AI Air India</option>
+            <option value="BZ">BZ Blue Dart Express</option>
+            <option value="CD">CD Alliance Air</option>
+            <option value="DN">DN Air Deccan</option>
+            <option value="IC">IC Indian Airlines</option>
+            <option value="IX">IX Air India Express</option>
+            <option value="LF">LF Lufthansa Cargo India</option>
+            <option value="S2">S2 Air Sahara</option>
+            <option value="SG">SG SpiceJet</option>
+            <option value="UK">UK VISTARA SIA Airlines</option>
+          </optgroup>
+          <optgroup label="인도네시아">
+            <option value="3Y">3Y Kartika Airlines</option>
+            <option value="6D">6D Pelita Air Service</option>
+            <option value="GA">GA Garuda Indonesia</option>
+            <option value="JT">JT LionAir</option>
+            <option value="MZ">MZ Merpati</option>
+            <option value="RI">RI Mandala Airliens</option>
+            <option value="Y6">Y6 Batavia Air</option>
+          </optgroup>
+          <optgroup label="일본">
+            <option value="3X">3X Japan Air Commuter</option>
+            <option value="6J">6J Solaseed air</option>
+            <option value="6L">6L Hokkaido Air System</option>
+            <option value="7A">7A Air Next</option>
+            <option value="7G">7G STARFLYER</option>
+            <option value="BC">BC Skymark Airlines</option>
+            <option value="EH">EH Air Nippon Network Co. Ltd.</option>
+            <option value="EL">EL Air Nippon</option>
+            <option value="HC">HC HOKKAIDO AIR SYSTEM</option>
+            <option value="HD">HD Hokkaido International Airlines - Air Do</option>
+            <option value="JC">JC JAL Express</option>
+            <option value="JH">JH FDA - Fuji Dream Airlines</option>
+            <option value="JL">JL Japan Airlines</option>
+            <option value="JO">JO JALways Co. Ltd.</option>
+            <option value="JW">JW Vinillar AIR(Previous AirAsia Japan)</option>
+            <option value="KZ">KZ Nippon Cargo Airlines</option>
+            <option value="MM">MM AIR PEACH</option>
+            <option value="NH">NH All Nippon Airways</option>
+            <option value="NQ">NQ Air Japan</option>
+            <option value="NU">NU Japan Transocean Air</option>
+            <option value="ZG">ZG ZIPAIR Tokyo</option>
+          </optgroup>
+          <optgroup label="자메이카">
+            <option value="JM">JM Air Jamaica</option>
+          </optgroup>
+          <optgroup label="잠비아">
+            <option value="1W">1W West African Link</option>
+            <option value="Q3">Q3 Zambian Airways</option>
+            <option value="Q9">Q9 Afrinat International Airlines</option>
+          </optgroup>
+          <optgroup label="조선인민공화국">
+            <option value="JS">JS Air Koryo</option>
+          </optgroup>
+          <optgroup label="중국">
+            <option value="2Z">2Z Chang an Airlines</option>
+            <option value="3U">3U sichuan airlines</option>
+            <option value="8C">8C shanxi airlines</option>
+            <option value="8L">8L Lucky Air</option>
+            <option value="9C">9C AIR SPRING</option>
+            <option value="BK">BK Okay Airways</option>
+            <option value="CA">CA Air China</option>
+            <option value="CF">CF China Postal Airlines</option>
+            <option value="CK">CK China Cargo Airlines</option>
+            <option value="CZ">CZ China Southern Airlines</option>
+            <option value="DA">DA DEER JET</option>
+            <option value="DF">DF Deerjet</option>
+            <option value="DR">DR Ruili Airlines</option>
+            <option value="DZ">DZ Donghai Airlines</option>
+            <option value="FM">FM Shanghai Airlines Co. Ltd.</option>
+            <option value="G5">G5 China Express Airlines</option>
+            <option value="GD">GD GRANDSTAR CARGO</option>
+            <option value="GI">GI Guangdong Longhao Airlines</option>
+            <option value="GJ">GJ Loong Air</option>
+            <option value="GP">GP China General Aviation Corp. - CGAC</option>
+            <option value="GS">GS Tianjin Airlines</option>
+            <option value="HO">HO JUNEYAO AIRLINES</option>
+            <option value="HT">HT TIANJIN CARGO</option>
+            <option value="HU">HU Hainan Airlines</option>
+            <option value="HX">HX HONG KONG AIRLINES</option>
+            <option value="I9">I9 China Central Airlines Co., Ltd.</option>
+            <option value="IJ">IJ Great wall airlines</option>
+            <option value="JD">JD Beijing Capital Airlines Co.Ltd</option>
+            <option value="JI">JI JADE CARGO INTERNATIONAL</option>
+            <option value="KN">KN China United Airlines</option>
+            <option value="MF">MF Xiamen Airlines</option>
+            <option value="MU">MU China Eastern Airlines</option>
+            <option value="NS">NS Hebei Airlines</option>
+            <option value="O3">O3 SF Airlines</option>
+            <option value="OQ">OQ Chongqing Airlines</option>
+            <option value="PN">PN WEST CHINA</option>
+            <option value="QW">QW Qingdao Airlines</option>
+            <option value="RY">RY Jiangxi Air</option>
+            <option value="SC">SC Shandong Airlines</option>
+            <option value="SZ">SZ China Southwest Airlines</option>
+            <option value="WH">WH China Northwest Airlines</option>
+            <option value="WU">WU wuhan airlines</option>
+            <option value="Y8">Y8 Suparna Airlines Company Limited</option>
+            <option value="YG">YG YTO Cargo Airlines</option>
+            <option value="ZH">ZH Shenzhen Airlines</option>
+          </optgroup>
+          <optgroup label="지부티공화국">
+            <option value="D3">D3 Daallo Airlines</option>
+          </optgroup>
+          <optgroup label="짐바브웨">
+            <option value="UM">UM Air Zimbabwe</option>
+            <option value="Z3">Z3 Avient Aviation</option>
+            <option value="ZL">ZL Affretair</option>
+          </optgroup>
+          <optgroup label="체코공화국">
+            <option value="3B">3B Central Connect Airlines</option>
+            <option value="OK">OK Czech Airlines(CSA)</option>
+            <option value="QS">QS Travel Service</option>
+          </optgroup>
+          <optgroup label="칠레">
+            <option value="LA">LA LATAM Airlines Chile</option>
+            <option value="OT">OT Avant Airlines</option>
+            <option value="UC">UC Lan Chile Cargo S.A.</option>
+          </optgroup>
+          <optgroup label="카보베르데">
+            <option value="VR">VR TACV Cabo Verde Airlines</option>
+          </optgroup>
+          <optgroup label="카자흐스탄">
+            <option value="0K">0K Air Kokshetau</option>
+            <option value="9Y">9Y Air Kazakstan</option>
+            <option value="DV">DV SCAT Airlines</option>
+            <option value="IP">IP Atyrau Airways</option>
+            <option value="KB">KB K-BAS</option>
+            <option value="KC">KC Air Astana</option>
+            <option value="W7">W7 Sayakhat Air Company</option>
+          </optgroup>
+          <optgroup label="카타르">
+            <option value="QA">QA Qatar Amiri Flight</option>
+            <option value="QR">QR Qatar Airways(Q.C.S.C)</option>
+          </optgroup>
+          <optgroup label="캄보디아">
+            <option value="G6">G6 ANGKOR AIRWAYS</option>
+            <option value="K6">K6 Air Cambodia</option>
+            <option value="K9">K9 Tonlesap Airlines</option>
+            <option value="KR">KR Cambodia Airways</option>
+            <option value="QD">QD JC INTERNATINAL AIRLINES</option>
+            <option value="RK">RK Royal Khmer Airlines</option>
+            <option value="U4">U4 Progress Multitrade Air</option>
+            <option value="ZA">ZA SKYWINGS ANKOR AIRLINES</option>
+          </optgroup>
+          <optgroup label="캐나다">
+            <option value="3H">3H Air Inuit</option>
+            <option value="4N">4N Air North Charter</option>
+            <option value="5T">5T Canadian North</option>
+            <option value="6O">6O Air Satellite</option>
+            <option value="AC">AC Air Canada</option>
+            <option value="J3">J3 Northwestern Air Lease</option>
+            <option value="MO">MO Calm Air International Ltd.</option>
+            <option value="PD">PD Pemair</option>
+            <option value="QK">QK Air Canada Jazz</option>
+            <option value="W8">W8 Cargojet Airways</option>
+            <option value="WS">WS Westjet</option>
+          </optgroup>
+          <optgroup label="캐이맨,영국령">
+            <option value="KX">KX Cayman Airways</option>
+          </optgroup>
+          <optgroup label="케냐">
+            <option value="5H">5H Fly540</option>
+            <option value="8V">8V Astral Aviation</option>
+            <option value="K5">K5 Air East Africa</option>
+            <option value="KQ">KQ Kenya Airways</option>
+            <option value="S9">S9 EAST AFRICAN SAFARI AIR</option>
+          </optgroup>
+          <optgroup label="코스타리카">
+            <option value="0W">0W West Caribbean Costa Rica</option>
+            <option value="LR">LR Lineas Aereas Costarricenses S.A.</option>
+          </optgroup>
+          <optgroup label="콜롬비아">
+            <option value="4C">4C LATAM Airlines Colombia</option>
+            <option value="6N">6N AeroSucre Colombia</option>
+            <option value="9N">9N SATENA (Servicio Aereo a Territorios Nacionales)</option>
+            <option value="AV">AV Avianca</option>
+            <option value="P5">P5 Aero Republica</option>
+            <option value="QT">QT Tampa Colombia</option>
+            <option value="YH">YH West Caribbean Airways</option>
+          </optgroup>
+          <optgroup label="콩고">
+            <option value="5E">5E Equaflight Service</option>
+            <option value="6V">6V LIGNES AERIENNES CONGOLAISES</option>
+          </optgroup>
+          <optgroup label="콩고자유공화국">
+            <option value="QC">QC Air Zaire</option>
+          </optgroup>
+          <optgroup label="쿠바">
+            <option value="CU">CU Cubana</option>
+          </optgroup>
+          <optgroup label="쿠웨이트">
+            <option value="KU">KU Kuwait Airways</option>
+          </optgroup>
+          <optgroup label="크로아티아">
+            <option value="OU">OU Croatia Airlines</option>
+          </optgroup>
+          <optgroup label="키르기스탄">
+            <option value="R8">R8 Kyrghyzstan Airlines</option>
+          </optgroup>
+          <optgroup label="키리바스 공화국">
+            <option value="4A">4A Air Kiribati</option>
+          </optgroup>
+          <optgroup label="키프로스">
+            <option value="ZU">ZU Helios Airways</option>
+          </optgroup>
+          <optgroup label="타즈키스탄">
+            <option value="4J">4J Somon Air</option>
+            <option value="7J">7J Tajik Air</option>
+          </optgroup>
+          <optgroup label="탄자니아">
+            <option value="PW">PW Precision Air</option>
+            <option value="TC">TC Air Tanzania Company Ltd.</option>
+          </optgroup>
+          <optgroup label="태국">
+            <option value="2Y">2Y Air Andaman</option>
+            <option value="8B">8B Business Airlines</option>
+            <option value="9I">9I Thai Sky Airlines</option>
+            <option value="9Q">9Q PB Air</option>
+            <option value="9R">9R Phuket Airlines Co., Ltd.</option>
+            <option value="D7">D7 AirAsia X</option>
+            <option value="FD">FD Thai AirAsia</option>
+            <option value="GT">GT P.C. AIR CO., LTD</option>
+            <option value="JF">JF Jet Asia Airways</option>
+            <option value="OX">OX Orient Thai Airlines</option>
+            <option value="PB">PB PB AIR(실제 IATA에 등록된 2Code는 9Q임)</option>
+            <option value="PG">PG Bangkok Airways</option>
+            <option value="SL">SL Thai Lion Air</option>
+            <option value="T2">T2 Thai Air Cargo</option>
+            <option value="TG">TG Thai Airways International Public</option>
+            <option value="TH">TH Transmile Air Services</option>
+            <option value="TJ">TJ Thai Jet International</option>
+            <option value="VZ">VZ Thai Vietjet Air</option>
+            <option value="XJ">XJ THAI AIRASIA X</option>
+            <option value="XT">XT SkyStar Airways</option>
+            <option value="XW">XW NokScoot</option>
+            <option value="YL">YL U Airline</option>
+          </optgroup>
+          <optgroup label="터키">
+            <option value="1I">1I Pegasus Airlines</option>
+            <option value="4I">4I IzAir</option>
+            <option value="5F">5F Best Air</option>
+            <option value="8Q">8Q Onur Air</option>
+            <option value="9T">9T ACT Airlines</option>
+            <option value="F2">F2 Fly Air</option>
+            <option value="KK">KK Atlasjet</option>
+            <option value="MB">MB MNG CARGO AIRLINES</option>
+            <option value="TK">TK Turkish Airlines Inc.</option>
+            <option value="XQ">XQ SunExpress</option>
+          </optgroup>
+          <optgroup label="토고">
+            <option value="KP">KP ASKY</option>
+          </optgroup>
+          <optgroup label="투르크멘">
+            <option value="T5">T5 Turkmenistan Airlines</option>
+            <option value="TS">TS Turkmenistan Airlines</option>
+          </optgroup>
+          <optgroup label="튀니지">
+            <option value="5R">5R Karthago Airlines</option>
+            <option value="TU">TU Tunisair</option>
+          </optgroup>
+          <optgroup label="트리니다드">
+            <option value="BW">BW Caribbean Airlines</option>
+          </optgroup>
+          <optgroup label="파기스탄">
+            <option value="4K">4K Askari Aviation</option>
+            <option value="E4">E4 Aero Asia International (Private) Ltd.</option>
+            <option value="ED">ED Air Blue</option>
+            <option value="NL">NL Shaheen Air</option>
+            <option value="PK">PK PIA Pakistan International Airlines</option>
+          </optgroup>
+          <optgroup label="파나마">
+            <option value="CM">CM COPA</option>
+            <option value="D5">D5 DHL Aero Expreso</option>
+          </optgroup>
+          <optgroup label="파라과이">
+            <option value="PZ">PZ TAM - Transportes Aereos del</option>
+          </optgroup>
+          <optgroup label="파퓨아뉴기니">
+            <option value="PX">PX Air Niugini Pty Limited</option>
+          </optgroup>
+          <optgroup label="팔라우">
+            <option value="0P">0P Palau Asia Pacific Air</option>
+          </optgroup>
+          <optgroup label="패로우아일랜드">
+            <option value="RC">RC Atlantic Airways</option>
+          </optgroup>
+          <optgroup label="페루">
+            <option value="2I">2I Star Peru</option>
+            <option value="LP">LP Lan Peru S.A.</option>
+            <option value="Q6">Q6 Aero-Condor</option>
+          </optgroup>
+          <optgroup label="포르투갈">
+            <option value="5K">5K SKY FLYER</option>
+            <option value="LK">LK Air Luxor</option>
+            <option value="NI">NI Portugalia - Companhia Portuguesa de</option>
+            <option value="S4">S4 SATA International</option>
+            <option value="SP">SP SATA - Air Acores</option>
+            <option value="TP">TP TAP - Air Portugal</option>
+            <option value="WI">WI White Airways</option>
+            <option value="YU">YU Euro Atlantic Airways</option>
+          </optgroup>
+          <optgroup label="폴란드">
+            <option value="4Q">4Q Air Italy Polska</option>
+            <option value="LO">LO LOT - Polish Airlines</option>
+            <option value="OF">OF Enter Air</option>
+          </optgroup>
+          <optgroup label="프랑스">
+            <option value="2C">2C CMA CGM Air Cargo</option>
+            <option value="5O">5O ASL Airlines France</option>
+            <option value="AF">AF Air France</option>
+            <option value="CE">CE Chalair</option>
+            <option value="PJ">PJ Air Saint Pierre</option>
+            <option value="SS">SS Corsair</option>
+            <option value="VK">VK Airbus Industrie</option>
+            <option value="W4">W4 Aero Services Executive</option>
+            <option value="XK">XK CCM Airlines</option>
+            <option value="YS">YS Regional Airlines</option>
+            <option value="ZI">ZI Aigle Azur</option>
+          </optgroup>
+          <optgroup label="프랑스령폴리네시아">
+            <option value="TN">TN Air Tahiti Nui</option>
+            <option value="VT">VT Air Tahiti</option>
+          </optgroup>
+          <optgroup label="피지">
+            <option value="FJ">FJ Air Pacific</option>
+            <option value="PI">PI Sunflower Airlines</option>
+          </optgroup>
+          <optgroup label="핀란드">
+            <option value="AY">AY Finnair</option>
+            <option value="NJ">NJ Nordic Global Airlines</option>
+          </optgroup>
+          <optgroup label="필리핀">
+            <option value="2P">2P PAL Express</option>
+            <option value="5J">5J Cebu Pacific Air</option>
+            <option value="6K">6K Asian Spirit</option>
+            <option value="8Y">8Y Pan Pacific Airlines</option>
+            <option value="PE">PE Pacific East Asia Cargo</option>
+            <option value="PR">PR Philippine Airlines, Inc.</option>
+            <option value="RW">RW Royal Air Philippines</option>
+            <option value="XO">XO SEAir International</option>
+            <option value="Z2">Z2 AirAsia Zest</option>
+          </optgroup>
+          <optgroup label="헝가리">
+            <option value="MA">MA Malev Hungarian Airlines</option>
+          </optgroup>
+          <optgroup label="홍콩">
+            <option value="CX">CX Cathay Pacific Airways</option>
+            <option value="HB">HB Greater Bay Airlines</option>
+            <option value="LD">LD Air Hong Kong</option>
+            <option value="RH">RH Hong Kong Air Cargo</option>
+            <option value="UO">UO Hong Kong Express Airways</option>
           </optgroup>
         </select>
+        </div>
         <span class="flight-sep">·</span>
         <input class="flight-input flight-num" id="flightNum" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="1234" maxlength="4" autocomplete="off" spellcheck="false" disabled>
       </div>
@@ -417,6 +1499,8 @@
   </div>
 
   <button class="reset-btn" id="resetBtn">이 편 초기화</button>
+
+  <div class="kas-badge"><b>KAS</b> · Korea Airport Service</div>
 
   </div><!-- /workerView -->
 </div>
@@ -981,6 +2065,7 @@ async function initApp(){
   operatorInput.disabled = false;
   flightCode.disabled = false;
   flightNum.disabled = false;
+  document.getElementById('flightCodeWrap').classList.remove('is-disabled');
   operatorInput.placeholder = '인터폰맨 성명 입력';
 }
 initApp();
